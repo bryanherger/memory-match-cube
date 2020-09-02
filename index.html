@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Memory Match Cube</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+			#info {
+				font-family: sans-serif;
+				position: absolute;
+				top: 0px;
+				width: 100%;
+				padding: 10px;
+				box-sizing: border-box;
+				text-align: center;
+				-moz-user-select: none;
+				-webkit-user-select: none;
+				-ms-user-select: none;
+				//user-select: none;
+				//pointer-events: none;
+				z-index: 1; /* TODO Solve this in HTML */
+			}
+			#button {
+				position: fixed;
+				bottom: 16px;
+				right: 16px;
+
+				padding: 12px;
+				border-radius: 50%;
+				margin-bottom: 0px;
+
+				background-color: #FFF;
+				opacity: .9;
+				z-index: 999;
+
+				box-shadow: 0 0 4px rgba(0,0,0,.15);
+			}
+				#button:hover {
+					cursor: pointer;
+					opacity: 1;
+				}
+				#button img {
+					display: block;
+					width: var(--icon-size);
+				}
+
+				#button.text {
+					border-radius: 25px;
+					padding-right: 20px;
+					padding-left: 20px;
+					color: var(--color-blue);
+					opacity: 1;
+					font-weight: 500;
+				}
+
+		</style>
+		<!-- CSS menu from https://www.w3schools.com/Css/css_dropdowns.asp -->
+		<style>
+		.menubtn {
+		  background-color: #4CAF50;
+		  color: white;
+		  padding: 16px;
+		  font-size: 16px;
+		  border: none;
+		  cursor: pointer;
+		}
+
+		.dropbtn {
+		  background-color: #4CAF50;
+		  color: white;
+		  padding: 16px;
+		  font-size: 16px;
+		  border: none;
+		  cursor: pointer;
+		}
+
+		.dropdown {
+		  position: relative;
+		  display: inline-block;
+		}
+
+		.dropdown-content {
+		  display: none;
+		  position: absolute;
+		  background-color: #f9f9f9;
+		  min-width: 160px;
+		  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+		  z-index: 1;
+		}
+
+		.dropdown-content a {
+		  color: black;
+		  padding: 12px 16px;
+		  text-decoration: none;
+		  display: block;
+		}
+
+		.dropdown-content a:hover {background-color: #f1f1f1}
+
+		.dropdown:hover .dropdown-content {
+		  display: block;
+		}
+
+		.dropdown:hover .dropbtn {
+		  background-color: #3e8e41;
+		}
+	</style>
+	</head>
+	<body>
+	<div id="info">
+	<span class="menubtn">Memory Match Cube</span>
+	&nbsp;
+	<span class="menubtn" id="topinfo"></span>
+	&nbsp;
+	<span class="menubtn" id="toptimer"></span>
+	&nbsp;
+	<span class="menubtn" id="toplog"></span>
+	&nbsp;
+	<a class="menubtn" href="#" onclick="alert('This is the Memory card game, but set up on a cube.  Click a square to reveal a number, then try to find the match. Click and drag to rotate the cube because the match may be on another side. Match all the squares and edges and corners to solve the puzzle!');">Help</a>
+	&nbsp;
+	<div class="dropdown">
+	  <button class="dropbtn">Options</button>
+	  <div class="dropdown-content">
+	  <a href="#">Cube size</a>
+	  <a href="#">Cube variety</a>
+	  <a href="#">Cube style</a>
+	  </div>
+	</div>
+	&nbsp;
+	<a class="menubtn" href="index.html">Reset</a></div>
+	<a id="button" target="_blank" href="https://github.com/mrdoob/three.js/blob/master/examples/misc_controls_orbit.html" title="View source code on GitHub" style=""><img src="ic_code_black_24dp.svg"></a>
+		<script src="js/three.js"></script>
+		<script>
+		// https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
+		// find intersections
+		var raycaster = new THREE.Raycaster();
+		var mouse = new THREE.Vector2();
+		var mousedown = false, dragging = false;
+		var previousMousePosition = {
+		    x: 0,
+		    y: 0
+		};
+		// mouse listeners
+		function handleMouseDown( event ) {
+			mousedown = true;
+		}
+function handleMouseMove( event ) {
+document.getElementById('toplog').innerHTML = "mousemove";
+if (!mousedown) {
+// but update previous position anyways, to avoid bouncy rotate when clicking!
+	previousMousePosition = {
+	        x: event.offsetX,
+	        y: event.offsetY
+    };
+document.getElementById('toplog').innerHTML = 'NOT dragging';
+return;
+}
+dragging = true;
+    var deltaMove = {
+        x: event.offsetX-previousMousePosition.x,
+        y: event.offsetY-previousMousePosition.y
+    };
+    dx = (deltaMove.y/100); dy = (deltaMove.x/100);
+	cubes.rotation.x += dx;
+	cubes.rotation.y += dy;
+	console.log('rotX = '+cubes.rotation.y+', rotY = '+cubes.rotation.y);
+	previousMousePosition = {
+	        x: event.offsetX,
+	        y: event.offsetY
+    };
+}
+function handleTouchMove( event ) {
+	document.getElementById('toplog').innerHTML = "touchmove";
+
+	var dx = ( event.touches[ 0 ].pageX - previousMousePosition.x );
+	var dy = ( event.touches[ 0 ].pageY - previousMousePosition.y );
+    var deltaMove = {
+        x: dx,
+        y: dy
+    };
+    dx = (deltaMove.y/100); dy = (deltaMove.x/100);
+	cubes.rotation.x += dx;
+	cubes.rotation.y += dy;
+	previousMousePosition = {
+	        x: event.touches[ 0 ].pageX,
+	        y: event.touches[ 0 ].pageY
+    };
+}
+function handleMouseUp( event ) {
+mousedown = false;
+if (dragging) { console.log('dragging'); dragging = false; return; }
+dragging = false;
+if (object2) { console.log('wait for reset'); return; }
+ var rect = renderer.domElement.getBoundingClientRect();
+mouse.x = ( ( event.clientX - rect.left ) / ( rect.width - rect.left ) ) * 2 - 1;
+mouse.y = - ( ( event.clientY - rect.top ) / ( rect.bottom - rect.top) ) * 2 + 1;
+
+	raycaster.setFromCamera( mouse, camera );
+
+    intersects = raycaster.intersectObjects( objects );
+
+    if ( intersects.length > 0 ) {
+		if (intersects[ 0 ].object.material.map && intersects[ 0 ].object.name === '') { console.log('Matched'); return; }
+        console.log('INTERSECT Count: ' + intersects.length);
+        console.log('INTERSECT[0]: ' + intersects[0].object);
+        //intersects[ 0 ].object.material.color.set( 0xff0000 );
+        intersects[ 0 ].object.material = new THREE.MeshBasicMaterial( { map: textures[intersects[ 0 ].object.name] } );
+
+        if (object1 == null) {
+        	object1 = intersects[ 0 ].object;
+        	console.log('object1 set: '+object1.name+',map='+object1.material.map);
+        } else if (object2 == null) {
+        	object2 = intersects[ 0 ].object;
+        	console.log('object1 set: '+object1.name+',map='+object1.material.map);
+        	console.log('object2 set: '+object2.name+',map='+object2.material.map);
+        	// test match
+        	if (object1.material.map && object2.material.map && (object1.material.map.name === object2.material.map.name)) {
+        		console.log('Match!');
+        		object1.name = ''; object2.name = '';
+        		object1 = null; object2 = null;
+        		cubecount = cubecount - 2;
+        		console.log('cubes left = '+cubecount);
+				topinfo.innerHTML = 'cubes remaining = '+cubecount;
+        		if (cubecount <= 0) { alert('solved!'); window.clearInterval(timerInterval); }
+        		return;
+        	}
+        	window.setTimeout(
+        	function() {
+        		object1.material = new THREE.MeshBasicMaterial( { color: colors[object1.name] } );
+        		object2.material = new THREE.MeshBasicMaterial( { color: colors[object2.name] } );
+        		object1 = null; object2 = null;
+        	}
+        	, resetwait);
+        }
+
+    }
+
+}
+
+		function handleStart(evt) {
+		  //evt.preventDefault();
+		  document.getElementById('toplog').innerHTML = "touchstart";
+			previousMousePosition = {
+					x: event.touches[ 0 ].pageX,
+					y: event.touches[ 0 ].pageY
+			};
+		  handleMouseDown(evt);
+		}
+		function handleEnd(evt) {
+		  //evt.preventDefault();
+		  document.getElementById('toplog').innerHTML = "touchend";
+		  handleMouseUp(evt);
+		}
+		function handleCancel(evt) {
+		  //evt.preventDefault();
+		  document.getElementById('toplog').innerHTML = "touchcancel";
+		}
+		function handleMove(evt) {
+		  //evt.preventDefault();
+		  document.getElementById('toplog').innerHTML = "touchmove";
+		}
+
+		function startup() {
+			document.getElementById('toplog').innerHTML = "DOMContentLoaded";
+			document.addEventListener( 'mousedown', handleMouseDown );
+			document.addEventListener( 'mousemove', handleMouseMove);
+			document.addEventListener( 'mouseup', handleMouseUp );
+			document.addEventListener("touchstart", handleStart);
+			document.addEventListener("touchend", handleEnd);
+			document.addEventListener("touchcancel", handleCancel);
+			document.addEventListener("touchmove", handleTouchMove);
+		}
+
+		document.addEventListener("DOMContentLoaded", startup);
+		// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+		function shuffle(array) {
+		  var currentIndex = array.length, temporaryValue, randomIndex;
+
+		  // While there remain elements to shuffle...
+		  while (0 !== currentIndex) {
+
+		    // Pick a remaining element...
+		    randomIndex = Math.floor(Math.random() * currentIndex);
+		    currentIndex -= 1;
+
+		    // And swap it with the current element.
+		    temporaryValue = array[currentIndex];
+		    array[currentIndex] = array[randomIndex];
+		    array[randomIndex] = temporaryValue;
+		  }
+
+		  return array;
+		}
+
+		// Used like so
+		var arr = [2, 11, 37, 42];
+		console.log(arr);
+		shuffle(arr);
+		console.log(arr);
+
+			// toptimer
+			var toptimer = document.getElementById('toptimer');
+			var seconds = 0;
+        	var timerInterval = window.setInterval(
+        	function() {
+        		seconds = seconds + 1;
+        		//toptimer.innerHTML = '' + seconds + ' seconds';
+        		//console.log('' + Math.floor(seconds/60) + ':' (seconds%60<10?'0':'') + (seconds%60));
+        		toptimer.innerHTML = '' + Math.floor(seconds/60) + ':' + (seconds%60<10?'0':'') + (seconds%60);
+        	}
+        	, 1000);
+
+			// Our Javascript will go here.
+			var topinfo = document.getElementById('topinfo');
+			const queryString = window.location.search;
+			console.log(queryString);
+			const urlParams = new URLSearchParams(queryString);
+			var objects = [];
+			var colors = [];
+			var textures = [];
+			var textureLib = [];
+			var object1 = null, object2 = null;
+			var cubesize = 4.0;
+			if (urlParams.has('cubesize')) { cubesize = urlParams.get('cubesize'); }
+			var cubemodulus = 4;
+			if (urlParams.has('cubemodulus')) { cubesize = urlParams.get('cubemodulus'); }
+			var resetwait = 1000;
+			if (urlParams.has('resetwait')) { cubesize = urlParams.get('resetwait'); }
+			var tileset = '';
+			if (urlParams.has('tileset')) { tileset = urlParams.get('tileset')+'_'; }
+			var cubeoffset = cubesize / 2.0;
+			var cubecount = 0;
+			console.log('size:'+cubesize+',offset:'+cubeoffset);
+			var texture = new THREE.TextureLoader().load( "textures/water.jpg" );
+			for (i = 1; i < 10; i++) {
+				var ti = new THREE.TextureLoader().load( "textures/"+tileset+i+".jpg" );
+				ti.name = i;
+				textureLib.push( ti );
+			}
+						var scene = new THREE.Scene();
+						scene.background = new THREE.Color( 0xf0f0f0 );
+						var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+						var renderer = new THREE.WebGLRenderer();
+						renderer.setSize( window.innerWidth, window.innerHeight );
+						document.body.appendChild( renderer.domElement );
+
+						cubes = new THREE.Object3D();
+						var c = 0;
+						for (x = 0; x < cubesize; x++) {
+							for (y = 0; y < cubesize; y++) {
+								for (z = 0; z < cubesize; z++) {
+									var geometryXYZ = new THREE.BoxGeometry();
+									var cname = Math.random() * 0xffffff;
+									var materialXYZ = new THREE.MeshBasicMaterial( { color: cname } );
+									var cubeXYZ = new THREE.Mesh( geometryXYZ, materialXYZ );
+									cubeXYZ.position.x = -cubeoffset + (x);
+									cubeXYZ.position.y = -cubeoffset + (y);
+									cubeXYZ.position.z = -cubeoffset + (z);
+									//cubeXYZ.name = cname;
+									cubeXYZ.name = cubecount;
+									if (x==0 || y==0 || z==0 || x==(cubesize-1) || y==(cubesize-1) || z==(cubesize-1)) {
+										cubes.add( cubeXYZ );
+										objects.push( cubeXYZ );
+										colors.push( cname );
+										var t = cubecount%cubemodulus;
+										textures.push( textureLib[t] );
+										cubecount++;
+									} else {
+										console.log('skipping interior cube');
+									}
+								}
+							}
+						}
+						scene.add( cubes );
+						topinfo.innerHTML = 'cubes remaining = '+cubecount;
+						console.log('cubes = '+cubecount);
+						shuffle(textures);
+						camera.position.z = cubesize * 1.5;
+
+						var animate = function () {
+							requestAnimationFrame( animate );
+
+							//cubes.rotation.x += 0.01;
+							//cubes.rotation.y += 0.01;
+
+							renderer.render( scene, camera );
+						};
+
+
+			animate();
+		</script>
+	</body>
+</html>
