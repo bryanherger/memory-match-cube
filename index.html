@@ -378,7 +378,7 @@ mouse.y = - ( ( event.clientY - rect.top ) / ( rect.bottom - rect.top) ) * 2 + 1
 			var cubecount = 0;
 			console.log('size:'+cubesize+',offset:'+cubeoffset);
 			var texture = new THREE.TextureLoader().load( "textures/water.jpg" );
-			for (i = 1; i < 10; i++) {
+			for (i = 1; i < 16; i++) {
 				var ti = new THREE.TextureLoader().load( "textures/"+tileset+"_"+i+".jpg" );
 				ti.name = i;
 				textureLib.push( ti );
