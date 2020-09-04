@@ -120,6 +120,7 @@
 	<div class="dropdown">
 	  <button class="dropbtn">Options</button>
 	  <div class="dropdown-content">
+	  <form id="form_id" action="index.html" method="GET">
 	  <a href="#">
 	  Cube size<br />
 	    <input type="radio" id="cube_size_3" name="cube_size" value="3">
@@ -147,9 +148,10 @@
 	    <input type="radio" id="cube_style_pic" name="cube_style" value="pic">
   		<label for="cube_style_pic">Pictures</label>
 	  </a>
-	  <a href="#">
+	  <a href="#" onclick="document.getElementById('form_id').submit();">
 	    Update
 	  </a>
+	  </form>
 	  </div>
 	</div>
 	&nbsp;
@@ -352,15 +354,25 @@ mouse.y = - ( ( event.clientY - rect.top ) / ( rect.bottom - rect.top) ) * 2 + 1
 			var textureLib = [];
 			var object1 = null, object2 = null;
 			var cubesize = 4;
-			if (urlParams.has('cubesize')) { cubesize = urlParams.get('cubesize'); }
+			if (urlParams.has('cube_size')) { cubesize = urlParams.get('cube_size'); console.log('cube size arg = '+cubesize); }
 			document.getElementById('cube_size_'+cubesize).checked = true;
 			var cubemodulus = 4;
-			if (urlParams.has('cubemodulus')) { cubemodulus = urlParams.get('cubemodulus'); }
+			if (urlParams.has('cube_scale')) { cubemodulus = urlParams.get('cube_scale'); }
 			document.getElementById('cube_scale_'+cubemodulus).checked = true;
+			// fix cube modulus.  We need more images (15) for "hard" factors
+			if (cubesize == 3 && cubemodulus == 3) { cubemodulus = 2; }
+			if (cubesize == 3 && cubemodulus == 4) { cubemodulus = 2; }
+			if (cubesize == 3 && cubemodulus == 5) { cubemodulus = 13; }
+			if (cubesize == 4 && cubemodulus == 3) { cubemodulus = 4; }
+			if (cubesize == 4 && cubemodulus == 4) { cubemodulus = 7; }
+			if (cubesize == 4 && cubemodulus == 5) { cubemodulus = 14; }
+			if (cubesize == 5 && cubemodulus == 3) { cubemodulus = 2; }
+			if (cubesize == 5 && cubemodulus == 4) { cubemodulus = 7; }
+			if (cubesize == 5 && cubemodulus == 5) { cubemodulus = 14; }
 			var resetwait = 1000;
 			if (urlParams.has('resetwait')) { resetwait = urlParams.get('resetwait'); }
 			var tileset = 'num';
-			if (urlParams.has('tileset')) { tileset = urlParams.get('tileset'); }
+			if (urlParams.has('cube_style')) { tileset = urlParams.get('cube_style'); }
 			document.getElementById('cube_style_'+tileset).checked = true;
 			var cubeoffset = cubesize / 2.0;
 			var cubecount = 0;
