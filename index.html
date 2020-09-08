@@ -1,6 +1,38 @@
 <!DOCTYPE html>
+<!--
+BSD 3-Clause License
+
+Copyright (c) 2020, Bryan Herger
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!-- This file is from https://github.com/bryanherger/memory-match-cube -->
 <html>
-	<head>
+<head>
 		<meta charset="utf-8">
 		<title>Memory Match Cube</title>
 		<style>
@@ -54,6 +86,7 @@
 					font-weight: 500;
 				}
 
+
 		</style>
 		<!-- CSS menu from https://www.w3schools.com/Css/css_dropdowns.asp -->
 		<style>
@@ -105,10 +138,11 @@
 		.dropdown:hover .dropbtn {
 		  background-color: #3e8e41;
 		}
+
 	</style>
-	</head>
-	<body>
-	<div id="info">
+</head>
+<body>
+<div id="info">
 	<span class="menubtn">Memory Match Cube</span>
 	&nbsp;
 	<span class="menubtn" id="topinfo"></span>
@@ -120,32 +154,32 @@
 	<div class="dropdown">
 	  <button class="dropbtn">Options</button>
 	  <div class="dropdown-content">
-	  <form id="form_id" action="index.html" method="GET">
+            <form action="index.html" id="form_id" method="GET">
 	  <a href="#">
-	  Cube size<br />
-	    <input type="radio" id="cube_size_3" name="cube_size" value="3">
+                    Cube size<br/>
+                    <input id="cube_size_3" name="cube_size" type="radio" value="3">
 	    <label for="cube_size_3">3</label><br>
-	    <input type="radio" id="cube_size_4" name="cube_size" value="4">
+                    <input id="cube_size_4" name="cube_size" type="radio" value="4">
 	    <label for="cube_size_4">4</label><br>
-	    <input type="radio" id="cube_size_5" name="cube_size" value="5">
+                    <input id="cube_size_5" name="cube_size" type="radio" value="5">
   		<label for="cube_size_5">5</label>
 	  </a>
 	  <a href="#">
-	  Cube difficulty<br />
-	    <input type="radio" id="cube_scale_3" name="cube_scale" value="3">
+                    Cube difficulty<br/>
+                    <input id="cube_scale_3" name="cube_scale" type="radio" value="3">
 	    <label for="cube_scale_3">Easy</label><br>
-	    <input type="radio" id="cube_scale_4" name="cube_scale" value="4">
+                    <input id="cube_scale_4" name="cube_scale" type="radio" value="4">
 	    <label for="cube_scale_4">Medium</label><br>
-	    <input type="radio" id="cube_scale_5" name="cube_scale" value="5">
+                    <input id="cube_scale_5" name="cube_scale" type="radio" value="5">
   		<label for="cube_scale_5">Hard</label>
 	  </a>
 	  <a href="#">
-	  Cube style<br />
-	    <input type="radio" id="cube_style_num" name="cube_style" value="num">
+                    Cube style<br/>
+                    <input id="cube_style_num" name="cube_style" type="radio" value="num">
 	    <label for="cube_style_num">Numbers</label><br>
-	    <input type="radio" id="cube_style_sym" name="cube_style" value="sym">
+                    <input id="cube_style_sym" name="cube_style" type="radio" value="sym">
 	    <label for="cube_style_sym">Playing cards</label><br>
-	    <input type="radio" id="cube_style_pic" name="cube_style" value="pic">
+                    <input id="cube_style_pic" name="cube_style" type="radio" value="pic">
   		<label for="cube_style_pic">Pictures</label>
 	  </a>
 	  <a href="#" onclick="document.getElementById('form_id').submit();">
@@ -155,15 +189,18 @@
 	  </div>
 	</div>
 	&nbsp;
-	<a class="menubtn" href="#" onclick="alert('This is the Memory card game, but set up on a cube. Click a square to reveal the item to match, then try to find the match anywhere on the cube. Click and drag to rotate the cube because the match may be on another side. Edges and corners have the same item on all sides. Match all the squares and edges and corners to solve the puzzle!');">Quick Start</a>
+    <a class="menubtn" href="#"
+       onclick="alert('This is the Memory card game, but set up on a cube. Click a square to reveal the item to match, then try to find the match anywhere on the cube. Click and drag to rotate the cube because the match may be on another side. Edges and corners have the same item on all sides. Match all the squares and edges and corners to solve the puzzle!\nClick Help to visit the game project page for more help or to report issues or suggestions.');">Quick
+        Start</a>
 	&nbsp;
-	<a class="menubtn" target="_blank" href="https://github.com/bryanherger/memory-match-cube">Help</a>
+    <a class="menubtn" href="https://github.com/bryanherger/memory-match-cube" target="_blank">Help</a>
 	&nbsp;
 	<a class="menubtn" href="index.html">Restart</a></div>
-	&nbsp;
-	<a id="button" target="_blank" href="https://github.com/bryanherger/memory-match-cube" title="View source code on GitHub" style=""><img src="ic_code_black_24dp.svg"></a>
-		<script src="js/three.js"></script>
-		<script>
+&nbsp;
+<a href="https://github.com/bryanherger/memory-match-cube" id="button" style=""
+   target="_blank" title="View source code on GitHub"><img src="ic_code_black_24dp.svg"></a>
+<script src="js/three.js"></script>
+<script>
 		// https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
 		// find intersections
 		var raycaster = new THREE.Raycaster();
@@ -174,9 +211,13 @@
 		    y: 0
 		};
 		// mouse listeners
-		function handleMouseDown( event ) {
+function handleMouseDown( event ) {
 			mousedown = true;
-		}
+}
+function handleMouseWheel( event ) {
+	// TODO: implement zoom in/out on mouse wheel, and also pinch zoom
+	console.log('onwheel');
+}
 function handleMouseMove( event ) {
 document.getElementById('toplog').innerHTML = "mousemove";
 if (!mousedown) {
@@ -298,10 +339,11 @@ mouse.y = - ( ( event.clientY - rect.top ) / ( rect.bottom - rect.top) ) * 2 + 1
 			document.addEventListener( 'mousedown', handleMouseDown );
 			document.addEventListener( 'mousemove', handleMouseMove);
 			document.addEventListener( 'mouseup', handleMouseUp );
-			document.addEventListener("touchstart", handleStart);
-			document.addEventListener("touchend", handleEnd);
-			document.addEventListener("touchcancel", handleCancel);
-			document.addEventListener("touchmove", handleTouchMove);
+			document.addEventListener( 'mousewheel', handleMouseWheel );
+			document.addEventListener( 'touchstart', handleStart);
+			document.addEventListener( 'touchend', handleEnd);
+			document.addEventListener( 'touchcancel', handleCancel);
+			document.addEventListener( 'touchmove', handleTouchMove);
 		}
 
 		document.addEventListener("DOMContentLoaded", startup);
@@ -435,6 +477,7 @@ mouse.y = - ( ( event.clientY - rect.top ) / ( rect.bottom - rect.top) ) * 2 + 1
 
 
 			animate();
-		</script>
-	</body>
+
+</script>
+</body>
 </html>
