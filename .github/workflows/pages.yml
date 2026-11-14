@@ -1,5 +1,5 @@
 # Publishes the game as a static site on GitHub Pages.
-# One-time setup: Settings → Pages → Source: GitHub Actions.
+# Pages is configured with "Source: GitHub Actions" in the repository settings.
 name: Deploy to GitHub Pages
 
 on:
@@ -28,11 +28,17 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Stage static site
+        # The game is plain static files: index.html + js/ + textures/. Copy only
+        # what the browser needs, so .git and workflow files are not published.
+        run: |
+          mkdir -p _site
+          rsync -a --exclude '.git' --exclude '.github' --exclude '_site' ./ _site/
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          # The game is plain static files: index.html + js/ + textures/.
-          path: .
+          path: _site
 
       - name: Deploy
         id: deployment
