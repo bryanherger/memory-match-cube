@@ -122,9 +122,21 @@ const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
 keyLight.position.set(-1, 1.6, -0.8);
 scene.add(keyLight);
 
+function requiredDistance() {
+  // Distance at which the cube fits both the vertical and horizontal field of
+  // view (portrait phones have very little horizontal FOV). 0.7 is a rough
+  // silhouette half-extent for a cube seen corner-on, which fills the frame
+  // better than the bounding sphere would.
+  const radius = config.size * 0.75;
+  const vHalf = THREE.MathUtils.degToRad(camera.fov) / 2;
+  const hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
+  const fit = Math.max(radius / Math.sin(vHalf), radius / Math.sin(hHalf)) * 1.08;
+  return Math.max(fit, config.size * 1.9); // keep perspective distortion sane
+}
+
 function frameCamera() {
-  const distance = config.size * 2.0;
-  camera.position.set(distance * 0.58, distance * 0.46, distance * 0.72);
+  const distance = requiredDistance();
+  camera.position.set(0.58, 0.46, 0.72).normalize().multiplyScalar(distance);
   controls.target.set(0, 0, 0);
   controls.update();
 }
@@ -135,6 +147,14 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Zoom out just enough to keep the whole cube visible; never crop it.
+  const offset = camera.position.clone().sub(controls.target);
+  const needed = requiredDistance();
+  if (offset.length() < needed) {
+    camera.position.copy(controls.target).add(offset.setLength(needed));
+    controls.update();
+  }
 });
 
 /* ------------------------------------------------------------------ *
