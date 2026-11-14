@@ -30,470 +30,349 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<!-- This file is from https://github.com/bryanherger/memory-match-cube -->
-<html>
+<!-- Source: https://github.com/bryanherger/memory-match-cube -->
+<html lang="en">
 <head>
-		<meta charset="utf-8">
-		<title>Memory Match Cube</title>
-		<style>
-			body { margin: 0; }
-			canvas { display: block; }
-			#info {
-				font-family: sans-serif;
-				position: absolute;
-				top: 0px;
-				width: 100%;
-				padding: 10px;
-				box-sizing: border-box;
-				text-align: center;
-				-moz-user-select: none;
-				-webkit-user-select: none;
-				-ms-user-select: none;
-				//user-select: none;
-				//pointer-events: none;
-				z-index: 1; /* TODO Solve this in HTML */
-			}
-			#button {
-				position: fixed;
-				bottom: 16px;
-				right: 16px;
-
-				padding: 12px;
-				border-radius: 50%;
-				margin-bottom: 0px;
-
-				background-color: #FFF;
-				opacity: .9;
-				z-index: 999;
-
-				box-shadow: 0 0 4px rgba(0,0,0,.15);
-			}
-				#button:hover {
-					cursor: pointer;
-					opacity: 1;
-				}
-				#button img {
-					display: block;
-					width: var(--icon-size);
-				}
-
-				#button.text {
-					border-radius: 25px;
-					padding-right: 20px;
-					padding-left: 20px;
-					color: var(--color-blue);
-					opacity: 1;
-					font-weight: 500;
-				}
-
-
-		</style>
-		<!-- CSS menu from https://www.w3schools.com/Css/css_dropdowns.asp -->
-		<style>
-		.menubtn {
-		  background-color: #4CAF50;
-		  color: white;
-		  padding: 16px;
-		  font-size: 16px;
-		  border: none;
-		  cursor: pointer;
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<meta name="color-scheme" content="light">
+	<meta name="theme-color" content="#f4f5f7">
+	<meta name="description" content="Memory Match Cube — the classic Memory card game played on the faces of a cube.">
+	<title>Memory Match Cube</title>
+	<link rel="icon" href="mmcube_icon_114.png">
+	<link rel="apple-touch-icon" href="mmcube_icon_114.png">
+	<style>
+		:root {
+			--chip-bg: rgba(255, 255, 255, 0.92);
+			--chip-border: rgba(15, 23, 42, 0.10);
+			--ink: #0f172a;
+			--accent: #2563eb;
+			--shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
 		}
 
-		.dropbtn {
-		  background-color: #4CAF50;
-		  color: white;
-		  padding: 16px;
-		  font-size: 16px;
-		  border: none;
-		  cursor: pointer;
+		* { box-sizing: border-box; }
+
+		html, body {
+			margin: 0;
+			height: 100%;
+			overflow: hidden;
+			background: #f4f5f7;
+			color: var(--ink);
+			font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+			-webkit-text-size-adjust: 100%;
 		}
 
-		.dropdown {
-		  position: relative;
-		  display: inline-block;
+		#view {
+			position: fixed;
+			inset: 0;
+			display: block;
+			width: 100%;
+			height: 100%;
+			touch-action: none;
+			cursor: grab;
+		}
+		#view:active { cursor: grabbing; }
+
+		#hud {
+			position: fixed;
+			inset: 0 0 auto 0;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			align-items: center;
+			justify-content: space-between;
+			padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+			pointer-events: none;
 		}
 
-		.dropdown-content {
-		  display: none;
-		  position: absolute;
-		  background-color: #f9f9f9;
-		  min-width: 160px;
-		  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-		  z-index: 1;
+		.hud-group {
+			display: flex;
+			gap: 8px;
+			align-items: center;
 		}
 
-		.dropdown-content a {
-		  color: black;
-		  padding: 12px 16px;
-		  text-decoration: none;
-		  display: block;
+		.chip {
+			display: inline-flex;
+			gap: 6px;
+			align-items: center;
+			min-height: 34px;
+			padding: 6px 12px;
+			border: 1px solid var(--chip-border);
+			border-radius: 999px;
+			background: var(--chip-bg);
+			box-shadow: var(--shadow);
+			color: var(--ink);
+			font: inherit;
+			font-variant-numeric: tabular-nums;
+			text-decoration: none;
+			white-space: nowrap;
+			pointer-events: auto;
+			cursor: pointer;
 		}
 
-		.dropdown-content a:hover {background-color: #f1f1f1}
+		button.chip:hover,
+		a.chip:hover,
+		summary.chip:hover { background: #fff; }
 
-		.dropdown:hover .dropdown-content {
-		  display: block;
+		.chip b { font-weight: 650; }
+
+		#hud-timer {
+			min-width: 4.6em;
+			justify-content: center;
 		}
 
-		.dropdown:hover .dropbtn {
-		  background-color: #3e8e41;
+		/* Options menu */
+		details#options { position: relative; }
+
+		details#options > summary {
+			list-style: none;
+		}
+		details#options > summary::-webkit-details-marker { display: none; }
+
+		#options-panel {
+			position: absolute;
+			top: calc(100% + 8px);
+			right: 0;
+			width: 230px;
+			padding: 14px;
+			border: 1px solid var(--chip-border);
+			border-radius: 14px;
+			background: #fff;
+			box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+			pointer-events: auto;
 		}
 
+		#options-panel fieldset {
+			margin: 0 0 12px;
+			padding: 0;
+			border: 0;
+		}
+
+		#options-panel legend {
+			padding: 0 0 4px;
+			color: #475569;
+			font-size: 12px;
+			font-weight: 650;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+		}
+
+		#options-panel label {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			padding: 3px 0;
+			cursor: pointer;
+		}
+
+		#options-panel input[type="submit"] {
+			width: 100%;
+			padding: 9px;
+			border: 0;
+			border-radius: 9px;
+			background: var(--accent);
+			color: #fff;
+			font: inherit;
+			font-weight: 600;
+			cursor: pointer;
+		}
+
+		/* Overlays */
+		.overlay {
+			position: fixed;
+			inset: 0;
+			display: grid;
+			place-items: center;
+			padding: 20px;
+			background: rgba(244, 245, 247, 0.72);
+			-webkit-backdrop-filter: blur(3px);
+			backdrop-filter: blur(3px);
+			transition: opacity 220ms ease;
+			z-index: 10;
+		}
+
+		.overlay.is-hidden {
+			opacity: 0;
+			pointer-events: none;
+		}
+
+		.panel {
+			width: min(360px, 100%);
+			padding: 22px;
+			border-radius: 18px;
+			background: #fff;
+			box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+			text-align: center;
+		}
+
+		.panel h1,
+		.panel h2 {
+			margin: 0 0 10px;
+			font-size: 20px;
+		}
+
+		.panel p { margin: 0 0 14px; color: #475569; }
+
+		#loading-bar {
+			width: 100%;
+			height: 6px;
+			border: 0;
+			border-radius: 999px;
+			overflow: hidden;
+			background: #e2e8f0;
+		}
+		#loading-bar::-webkit-progress-bar { background: #e2e8f0; border-radius: 999px; }
+		#loading-bar::-webkit-progress-value { background: var(--accent); border-radius: 999px; }
+		#loading-bar::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+
+		#solved { display: none; }
+		#solved.is-open { display: grid; }
+
+		.panel .button {
+			display: inline-flex;
+			justify-content: center;
+			min-height: 40px;
+			padding: 9px 18px;
+			border: 0;
+			border-radius: 9px;
+			background: var(--accent);
+			color: #fff;
+			font: inherit;
+			font-weight: 600;
+			text-decoration: none;
+			cursor: pointer;
+		}
+
+		#help-dialog {
+			width: min(440px, 92vw);
+			padding: 0;
+			border: 0;
+			border-radius: 18px;
+			box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+		}
+
+		#help-dialog::backdrop { background: rgba(15, 23, 42, 0.35); }
+
+		#help-dialog .panel { box-shadow: none; text-align: left; }
+		#help-dialog ul { margin: 0 0 16px; padding-left: 20px; color: #334155; }
+		#help-dialog li { margin-bottom: 6px; }
+
+		#source-link {
+			position: fixed;
+			right: calc(14px + env(safe-area-inset-right));
+			bottom: calc(14px + env(safe-area-inset-bottom));
+			display: grid;
+			place-items: center;
+			width: 42px;
+			height: 42px;
+			border-radius: 50%;
+			background: var(--chip-bg);
+			box-shadow: var(--shadow);
+			z-index: 5;
+		}
+		#source-link img { display: block; width: 24px; height: 24px; }
+
+		@media (max-width: 420px) {
+			.chip { padding: 5px 10px; font-size: 14px; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.overlay { transition: none; }
+		}
 	</style>
 </head>
 <body>
-<div id="info">
-    <!-- <span class="menubtn">Memory Match Cube</span>
-    &nbsp; -->
-	<span class="menubtn" id="topinfo"></span>
-	&nbsp;
-	<span class="menubtn" id="toptimer"></span>
-	&nbsp;
-	<span class="menubtn" id="toplog" style="display:none;"></span>
-    <!--&nbsp;-->
-	<div class="dropdown">
-	  <button class="dropbtn">Options</button>
-	  <div class="dropdown-content">
-            <form action="index.html" id="form_id" method="GET">
-	  <a href="#">
-                    Cube size<br/>
-                    <input id="cube_size_3" name="cube_size" type="radio" value="3">
-	    <label for="cube_size_3">3</label><br>
-                    <input id="cube_size_4" name="cube_size" type="radio" value="4">
-	    <label for="cube_size_4">4</label><br>
-                    <input id="cube_size_5" name="cube_size" type="radio" value="5">
-  		<label for="cube_size_5">5</label>
-	  </a>
-	  <a href="#">
-                    Cube difficulty<br/>
-                    <input id="cube_scale_3" name="cube_scale" type="radio" value="3">
-	    <label for="cube_scale_3">Easy</label><br>
-                    <input id="cube_scale_4" name="cube_scale" type="radio" value="4">
-	    <label for="cube_scale_4">Medium</label><br>
-                    <input id="cube_scale_5" name="cube_scale" type="radio" value="5">
-  		<label for="cube_scale_5">Hard</label>
-	  </a>
-	  <a href="#">
-                    Cube style<br/>
-                    <input id="cube_style_num" name="cube_style" type="radio" value="num">
-	    <label for="cube_style_num">Numbers</label><br>
-                    <input id="cube_style_sym" name="cube_style" type="radio" value="sym">
-	    <label for="cube_style_sym">Playing cards</label><br>
-                    <input id="cube_style_pic" name="cube_style" type="radio" value="pic">
-  		<label for="cube_style_pic">Pictures</label>
-	  </a>
-	  <a href="#" onclick="document.getElementById('form_id').submit();">
-	    Update
-	  </a>
-	  </form>
-	  </div>
+	<header id="hud">
+		<div class="hud-group">
+			<span class="chip">Tiles <b id="hud-tiles">0</b></span>
+			<span class="chip" id="hud-timer" aria-live="off">0:00</span>
+		</div>
+		<div class="hud-group">
+			<details id="options">
+				<summary class="chip">Options</summary>
+				<form id="options-form" method="GET" action="index.html">
+					<div id="options-panel">
+						<fieldset>
+							<legend>Cube size</legend>
+							<label><input type="radio" name="cube_size" value="3"> 3 × 3 × 3</label>
+							<label><input type="radio" name="cube_size" value="4"> 4 × 4 × 4</label>
+							<label><input type="radio" name="cube_size" value="5"> 5 × 5 × 5</label>
+						</fieldset>
+						<fieldset>
+							<legend>Difficulty</legend>
+							<label><input type="radio" name="cube_scale" value="3"> Easy</label>
+							<label><input type="radio" name="cube_scale" value="4"> Medium</label>
+							<label><input type="radio" name="cube_scale" value="5"> Hard</label>
+						</fieldset>
+						<fieldset>
+							<legend>Tile style</legend>
+							<label><input type="radio" name="cube_style" value="num"> Numbers</label>
+							<label><input type="radio" name="cube_style" value="sym"> Playing cards</label>
+							<label><input type="radio" name="cube_style" value="pic"> Pictures</label>
+						</fieldset>
+						<input type="submit" value="Apply and restart">
+					</div>
+				</form>
+			</details>
+			<button type="button" class="chip" id="help-button">Help</button>
+			<a class="chip" href="index.html">Restart</a>
+		</div>
+	</header>
+
+	<div id="loading" class="overlay">
+		<div class="panel">
+			<h1>Memory Match Cube</h1>
+			<p>Shuffling the cube…</p>
+			<progress id="loading-bar" max="100" value="0"></progress>
+		</div>
 	</div>
-	&nbsp;
-    <a class="menubtn" href="#"
-       onclick="alert('This is like the Memory card game, but set up on a cube. Click a square to reveal the item to match, then try to find the match anywhere on the cube. Click and drag to rotate the cube because the match may be on another side. Edges and corners have the same item on all sides. Match all the squares and edges and corners to solve the puzzle!\nClick the GitHub link in the bottom right to visit the game project page for more help or to report issues or suggestions.');">
-       Help</a>
-	&nbsp;
-    <!--<a class="menubtn" href="https://github.com/bryanherger/memory-match-cube" target="_blank">GitHub</a>
-    &nbsp;-->
-    <a class="menubtn" href="index.html">Restart</a>
-    </div>
-<!--&nbsp;-->
-<a href="https://github.com/bryanherger/memory-match-cube" id="button" style=""
-   target="_blank" title="View source code on GitHub"><img src="ic_code_black_24dp.svg"></a>
-<script src="js/three.min.js"></script>
-<script src="js/OrbitControls.js"></script>
-<script>
-// try to set screen orientation
-// set to either landscape
-window.screen.orientation.lock('landscape');
-// https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
-// find intersections
-var raycaster = new THREE.Raycaster();
-var mouse = new THREE.Vector2();
-var mousedown = false, dragging = false;
-var previousMousePosition = {
-		    x: 0,
-		    y: 0
-};
-// mouse listeners
-function handleMouseDown( event ) {
-			mousedown = true;
-}
-function handleMouseWheel( event ) {
-	// TODO: implement zoom in/out on mouse wheel, and also pinch zoom
-	console.log('onwheel');
-}
-function handleMouseMove( event ) {
-document.getElementById('toplog').innerHTML = "mousemove";
-if (!mousedown) {
-// but update previous position anyways, to avoid bouncy rotate when clicking!
-	previousMousePosition = {
-	        x: event.offsetX,
-	        y: event.offsetY
-    };
-document.getElementById('toplog').innerHTML = 'NOT dragging';
-return;
-}
-dragging = true;
-    var deltaMove = {
-        x: event.offsetX-previousMousePosition.x,
-        y: event.offsetY-previousMousePosition.y
-    };
-    dx = (deltaMove.y/100); dy = (deltaMove.x/100);
-	cubes.rotation.x += dx;
-	cubes.rotation.y += dy;
-	console.log('rotX = '+cubes.rotation.y+', rotY = '+cubes.rotation.y);
-	previousMousePosition = {
-	        x: event.offsetX,
-	        y: event.offsetY
-    };
-}
-function handleTouchMove( event ) {
-	document.getElementById('toplog').innerHTML = "touchmove";
 
-	var dx = ( event.touches[ 0 ].pageX - previousMousePosition.x );
-	var dy = ( event.touches[ 0 ].pageY - previousMousePosition.y );
-    var deltaMove = {
-        x: dx,
-        y: dy
-    };
-    dx = (deltaMove.y/100); dy = (deltaMove.x/100);
-	cubes.rotation.x += dx;
-	cubes.rotation.y += dy;
-	previousMousePosition = {
-	        x: event.touches[ 0 ].pageX,
-	        y: event.touches[ 0 ].pageY
-    };
-}
-function handleMouseUp( event ) {
-mousedown = false;
-if (dragging) { console.log('dragging'); dragging = false; return; }
-dragging = false;
-if (object2) { console.log('wait for reset'); return; }
- var rect = renderer.domElement.getBoundingClientRect();
-mouse.x = ( ( event.clientX - rect.left ) / ( rect.width - rect.left ) ) * 2 - 1;
-mouse.y = - ( ( event.clientY - rect.top ) / ( rect.bottom - rect.top) ) * 2 + 1;
+	<div id="solved" class="overlay" role="dialog" aria-labelledby="solved-title">
+		<div class="panel">
+			<h2 id="solved-title">Solved!</h2>
+			<p>You matched every tile in <b id="solved-time">0:00</b>.</p>
+			<a class="button" href="index.html">Play again</a>
+		</div>
+	</div>
 
-	raycaster.setFromCamera( mouse, camera );
+	<dialog id="help-dialog">
+		<div class="panel">
+			<h2>How to play</h2>
+			<ul>
+				<li>Tap a square to reveal its tile.</li>
+				<li>Tap a second square to look for its match — anywhere on the cube.</li>
+				<li>Drag to rotate the cube; matches can be on another face, edge, or corner.</li>
+				<li>Edges and corners show the same tile on every side they face.</li>
+				<li>Clear every tile to solve the cube. Fewer distinct tiles means an easier game.</li>
+			</ul>
+			<button type="button" class="button" id="help-close">Got it</button>
+		</div>
+	</dialog>
 
-    intersects = raycaster.intersectObjects( objects );
+	<a href="https://github.com/bryanherger/memory-match-cube" id="source-link" target="_blank"
+	   rel="noopener" title="View source on GitHub" aria-label="View source on GitHub">
+		<img src="ic_code_black_24dp.svg" alt="">
+	</a>
 
-    if ( intersects.length > 0 ) {
-		if (intersects[ 0 ].object.material.map && intersects[ 0 ].object.name === '') { console.log('Matched'); return; }
-        console.log('INTERSECT Count: ' + intersects.length);
-        console.log('INTERSECT[0]: ' + intersects[0].object);
-        //intersects[ 0 ].object.material.color.set( 0xff0000 );
-        intersects[ 0 ].object.material = new THREE.MeshBasicMaterial( { map: textures[intersects[ 0 ].object.name] } );
+	<noscript>
+		<div class="overlay">
+			<div class="panel">
+				<h1>Memory Match Cube</h1>
+				<p>This game needs JavaScript and WebGL.</p>
+			</div>
+		</div>
+	</noscript>
 
-        if (object1 == null) {
-        	object1 = intersects[ 0 ].object;
-        	console.log('object1 set: '+object1.name+',map='+object1.material.map);
-        } else if (object2 == null) {
-        	object2 = intersects[ 0 ].object;
-        	console.log('object1 set: '+object1.name+',map='+object1.material.map);
-        	console.log('object2 set: '+object2.name+',map='+object2.material.map);
-        	// test match
-        	if (object1.material.map && object2.material.map && (object1.material.map.name === object2.material.map.name)) {
-        		console.log('Match!');
-        		object1.name = ''; object2.name = '';
-        		object1 = null; object2 = null;
-        		cubecount = cubecount - 2;
-        		console.log('cubes left = '+cubecount);
-				topinfo.innerHTML = 'Cubes: '+cubecount;
-        		if (cubecount <= 0) { alert('solved!'); window.clearInterval(timerInterval); }
-        		return;
-        	}
-        	window.setTimeout(
-        	function() {
-        		object1.material = new THREE.MeshBasicMaterial( { color: colors[object1.name] } );
-        		object2.material = new THREE.MeshBasicMaterial( { color: colors[object2.name] } );
-        		object1 = null; object2 = null;
-        	}
-        	, resetwait);
-        }
-
-    }
-
-}
-
-		function handleStart(evt) {
-		  //evt.preventDefault();
-		  document.getElementById('toplog').innerHTML = "touchstart";
-			previousMousePosition = {
-					x: event.touches[ 0 ].pageX,
-					y: event.touches[ 0 ].pageY
-			};
-		  handleMouseDown(evt);
+	<!-- three.js and its addons are served locally; the import map keeps the
+	     bare specifiers used by the addons working on any static host. -->
+	<script type="importmap">
+	{
+		"imports": {
+			"three": "./js/vendor/three.module.js",
+			"three/addons/": "./js/vendor/addons/"
 		}
-		function handleEnd(evt) {
-		  //evt.preventDefault();
-		  document.getElementById('toplog').innerHTML = "touchend";
-		  handleMouseUp(evt);
-		}
-		function handleCancel(evt) {
-		  //evt.preventDefault();
-		  document.getElementById('toplog').innerHTML = "touchcancel";
-		}
-		function handleMove(evt) {
-		  //evt.preventDefault();
-		  document.getElementById('toplog').innerHTML = "touchmove";
-		}
-
-		function startup() {
-			document.getElementById('toplog').innerHTML = "DOMContentLoaded";
-			document.addEventListener( 'mousedown', handleMouseDown );
-			document.addEventListener( 'mouseup', handleMouseUp );
-			//document.addEventListener( 'mousewheel', handleMouseWheel );
-			document.addEventListener( 'touchstart', handleStart);
-			document.addEventListener( 'touchend', handleEnd);
-			document.addEventListener( 'touchcancel', handleCancel);
-// This was used to rotate the cube, but now OrbitControls rotates the camera
-			//document.addEventListener( 'mousemove', handleMouseMove);
-			//document.addEventListener( 'touchmove', handleTouchMove);
-		}
-
-document.addEventListener("DOMContentLoaded", startup);
-
-// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-function shuffle(array) {
-		  var currentIndex = array.length, temporaryValue, randomIndex;
-
-		  // While there remain elements to shuffle...
-		  while (0 !== currentIndex) {
-
-		    // Pick a remaining element...
-		    randomIndex = Math.floor(Math.random() * currentIndex);
-		    currentIndex -= 1;
-
-		    // And swap it with the current element.
-		    temporaryValue = array[currentIndex];
-		    array[currentIndex] = array[randomIndex];
-		    array[randomIndex] = temporaryValue;
-		  }
-
-		  return array;
-}
-
-// Used like so
-var arr = [2, 11, 37, 42];
-console.log(arr);
-shuffle(arr);
-console.log(arr);
-
-// toptimer
-var toptimer = document.getElementById('toptimer');
-var seconds = 0;
-var timerInterval = window.setInterval(
-        	function() {
-        		seconds = seconds + 1;
-        		//toptimer.innerHTML = '' + seconds + ' seconds';
-        		//console.log('Play time = ' + Math.floor(seconds/60) + 'm:' (seconds%60<10?'0':'') + (seconds%60));
-	toptimer.innerHTML = 'Time: ' + Math.floor(seconds/60) + 'm:' + (seconds%60<10?'0':'') + (seconds%60) + 's';
-        	}
-        	, 1000);
-
-// Our Javascript will go here.
-var topinfo = document.getElementById('topinfo');
-const queryString = window.location.search;
-console.log(queryString);
-const urlParams = new URLSearchParams(queryString);
-var objects = [];
-var colors = [];
-var textures = [];
-var textureLib = [];
-var object1 = null, object2 = null;
-var cubesize = 4;
-if (urlParams.has('cube_size')) { cubesize = urlParams.get('cube_size'); console.log('cube size arg = '+cubesize); }
-document.getElementById('cube_size_'+cubesize).checked = true;
-var cubemodulus = 4;
-if (urlParams.has('cube_scale')) { cubemodulus = urlParams.get('cube_scale'); }
-document.getElementById('cube_scale_'+cubemodulus).checked = true;
-// fix cube modulus.  We need more images (15) for "hard" factors
-if (cubesize == 3 && cubemodulus == 3) { cubemodulus = 2; }
-if (cubesize == 3 && cubemodulus == 4) { cubemodulus = 2; }
-if (cubesize == 3 && cubemodulus == 5) { cubemodulus = 13; }
-if (cubesize == 4 && cubemodulus == 3) { cubemodulus = 4; }
-if (cubesize == 4 && cubemodulus == 4) { cubemodulus = 7; }
-if (cubesize == 4 && cubemodulus == 5) { cubemodulus = 14; }
-if (cubesize == 5 && cubemodulus == 3) { cubemodulus = 2; }
-if (cubesize == 5 && cubemodulus == 4) { cubemodulus = 7; }
-if (cubesize == 5 && cubemodulus == 5) { cubemodulus = 14; }
-var resetwait = 1000;
-if (urlParams.has('resetwait')) { resetwait = urlParams.get('resetwait'); }
-var tileset = 'num';
-if (urlParams.has('cube_style')) { tileset = urlParams.get('cube_style'); }
-document.getElementById('cube_style_'+tileset).checked = true;
-var cubeoffset = cubesize / 2.0;
-var cubecount = 0;
-console.log('size:'+cubesize+',offset:'+cubeoffset);
-var texture = new THREE.TextureLoader().load( "textures/water.jpg" );
-for (i = 1; i < 16; i++) {
-var ti = new THREE.TextureLoader().load( "textures/"+tileset+"_"+i+".jpg" );
-ti.name = i;
-textureLib.push( ti );
-}
-var scene = new THREE.Scene();
-scene.background = new THREE.Color( 0xf0f0f0 );
-
-// orbit controls derived from examples at https://dustinpfister.github.io/2018/04/13/threejs-orbit-controls/
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
-camera.position.set(cubesize, 0, cubesize * 1.5);
-camera.lookAt(0, 0, 0);
-//camera.position.z = cubesize * 1.5;
-var controls = new THREE.OrbitControls(camera);
-// vertical angle control
-//controls.minPolarAngle = -2*Math.PI;
-//controls.maxPolarAngle = 2*Math.PI;
-
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
-
-cubes = new THREE.Object3D();
-var c = 0;
-for (x = 0; x < cubesize; x++) {
-							for (y = 0; y < cubesize; y++) {
-								for (z = 0; z < cubesize; z++) {
-									var geometryXYZ = new THREE.BoxGeometry();
-									var cname = Math.random() * 0xffffff;
-									var materialXYZ = new THREE.MeshBasicMaterial( { color: cname } );
-									var cubeXYZ = new THREE.Mesh( geometryXYZ, materialXYZ );
-									cubeXYZ.position.x = -cubeoffset + (x);
-									cubeXYZ.position.y = -cubeoffset + (y);
-									cubeXYZ.position.z = -cubeoffset + (z);
-									//cubeXYZ.name = cname;
-									cubeXYZ.name = cubecount;
-									if (x==0 || y==0 || z==0 || x==(cubesize-1) || y==(cubesize-1) || z==(cubesize-1)) {
-										cubes.add( cubeXYZ );
-										objects.push( cubeXYZ );
-										colors.push( cname );
-										var t = cubecount%cubemodulus;
-										textures.push( textureLib[t] );
-										cubecount++;
-									} else {
-										console.log('skipping interior cube');
-									}
-								}
-							}
-}
-scene.add( cubes );
-topinfo.innerHTML = 'Cubes: '+cubecount;
-console.log('cubes = '+cubecount);
-shuffle(textures);
-
-var animate = function () {
-							requestAnimationFrame( animate );
-	controls.update();
-
-							//cubes.rotation.x += 0.01;
-							//cubes.rotation.y += 0.01;
-
-							renderer.render( scene, camera );
-};
-
-
-animate();
-
-</script>
+	}
+	</script>
+	<script type="module" src="js/app.js"></script>
 </body>
 </html>
