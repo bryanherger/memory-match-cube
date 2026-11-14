@@ -344,7 +344,12 @@ manager.onError = (url) => {
 manager.onLoad = () => {
   buildBoard();
   startTimer();
-  ui.loading?.classList.add('is-hidden');
+  if (ui.loading) {
+    ui.loading.classList.add('is-hidden');
+    // Remove it entirely: a CSS fade alone can be throttled on slow GPUs and
+    // would otherwise leave the panel covering the board.
+    window.setTimeout(() => ui.loading?.remove(), 300);
+  }
 };
 
 const loader = new THREE.TextureLoader(manager);
