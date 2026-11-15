@@ -325,9 +325,9 @@ function formatTime(ms) {
 
 function startTimer() {
   startedAt = performance.now();
-  ui.timer.textContent = formatTime(0);
+  if (ui.timer) ui.timer.textContent = formatTime(0);
   timerId = window.setInterval(() => {
-    ui.timer.textContent = formatTime(performance.now() - startedAt);
+    if (ui.timer) ui.timer.textContent = formatTime(performance.now() - startedAt);
   }, 250);
 }
 
@@ -337,16 +337,18 @@ function stopTimer() {
 }
 
 function updateHud() {
-  ui.tiles.textContent = String(remaining);
+  if (ui.tiles) ui.tiles.textContent = String(remaining);
 }
 
 function solve() {
   stopTimer();
   const elapsed = performance.now() - startedAt;
-  ui.timer.textContent = formatTime(elapsed);
-  ui.solvedTime.textContent = formatTime(elapsed);
-  ui.solved.hidden = false;
-  ui.solved.classList.add('is-open');
+  if (ui.timer) ui.timer.textContent = formatTime(elapsed);
+  if (ui.solvedTime) ui.solvedTime.textContent = formatTime(elapsed);
+  if (ui.solved) {
+    ui.solved.hidden = false;
+    ui.solved.classList.add('is-open');
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -362,13 +364,16 @@ manager.onError = (url) => {
   if (ui.loading) ui.loading.textContent = `Could not load ${url}`;
 };
 manager.onLoad = () => {
-  buildBoard();
-  startTimer();
-  if (ui.loading) {
-    ui.loading.classList.add('is-hidden');
-    // Remove it entirely: a CSS fade alone can be throttled on slow GPUs and
-    // would otherwise leave the panel covering the board.
-    window.setTimeout(() => ui.loading?.remove(), 300);
+  try {
+    buildBoard();
+    startTimer();
+  } finally {
+    // Never leave the loader covering the board, even if a HUD node is
+    // missing because the markup was edited.
+    if (ui.loading) {
+      ui.loading.classList.add('is-hidden');
+      window.setTimeout(() => ui.loading?.remove(), 300);
+    }
   }
 };
 
